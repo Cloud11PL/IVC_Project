@@ -1,0 +1,98 @@
+%unzip('catdog.zip');
+%imds = imageDatastore('catdog', ...
+%     'IncludeSubfolders',true, ...
+%     'LabelSource','foldernames'); 
+% [imdsTrain,imdsTest] = splitEachLabel(imds,0.8);
+
+%strongestBag = bagOfFeatures(imdsTrain);
+%catergoryClassifier = trainImageCategoryClassifier(imdsTrain,bag);
+%confMat = evaluate(catergoryClassifier,imdsTest);
+%valScore = confMat.score;
+
+% bestScore = 0;
+% bestSF = 0.8;
+% bestVS = 500;
+% currSF = bestSF;
+% currVS = bestVS;
+
+c = cvpartition(numel(imdsTrain.Files),'KFold',10);
+
+bag = bagOfFeatures(imds, ...
+    'PointSelection', 'Detector', ...
+    'StrongestFeatures', 0.99);
+
+vec = encode(bag,imds);
+
+partIdx = floor(size(vecTrain,1)*0.8);
+
+vecTrain = vec(1:partIdx,:);
+vecTest = vec(partIdx+1:size(vecTrain,1),:);
+
+
+svm = fitcsvm(vecTrain,imdsTrain.Labels);
+svm = crossval(svm,'KFold',10);
+svm = svm.Trained{1};
+
+r=loss(svm,vecTest,imdsTest.Labels);
+
+%[l,s] = predict(svm,vecTest);
+
+% for i = 1:3
+%     trainingInd = training(c,i);
+%     valInd = test(c,i);
+%  
+%     trainingSet = subset(imdsTrain,trainingInd);
+%     valSet = subset(imdsTrain,valInd);
+%     
+%     bagTrain = bagOfFeatures(trainingSet, ...
+%         'StrongestFeatures', currSF, ...
+%         'VocabularySize', currVS, ...
+%         'PointSelection', 'Detector');
+%     
+%     bagVal = bagOfFeatures(valSet, ...
+%         'StrongestFeatures', currSF, ...
+%         'VocabularySize', currVS, ...
+%         'PointSelection', 'Detector');
+%     
+%     trainVec = encode(bagTrain,trainingSet);
+%     valVec = encode(bagVal,valSet);
+%     
+%     svm = fitcsvm(trainVec,trainingSet.Labels);
+% end
+
+% % for i=1:10
+%     trainingInd = training(c,i);
+%     valInd = test(c,i);
+%  
+%     trainingSet = subset(imdsTrain,trainingInd);
+%     valSet = subset(imdsTrain,valInd);
+%     
+%     bag = bagOfFeatures(trainingSet, ...
+%         'StrongestFeatures', currSF, ...
+%         'VocabularySize', currVS, ...
+%         'PointSelection', 'Detector');
+%     
+%     catergoryClassifier = trainImageCategoryClassifier(trainingSet,bag);
+%     
+%     confMat = evaluate(catergoryClassifier,valSet);
+%     score = mean(diag(confMat));
+%     
+%     if score > bestScore
+%         bestScore = score;
+%         bestClassifier = catergoryClassifier;
+%         bestSF = currSF;
+%         bestVS = currVS;
+%     else
+%         currSF = bestSF;
+% %         currVS = bestVS;
+%     end
+%     
+%     %Add random noise to the params
+%     SFNoise = randi([-1,1],1);
+%     currSF = currSF + SFNoise*0.01;
+%     
+%     
+%     VSNoise = randi([-1,1],1);
+%     currVS = currVS + VSNoise*100;
+%     
+% end
