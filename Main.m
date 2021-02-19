@@ -1,23 +1,26 @@
-unzip('catdog.zip');
-imds = imageDatastore('catdog', ...
-     'IncludeSubfolders',true, ...
-     'LabelSource','foldernames'); 
-[A,B,C] = splitEachLabel(imds,0.33,0.33);
+% unzip('catdog.zip');
+% imds = imageDatastore('catdog', ...
+%      'IncludeSubfolders',true, ...
+%      'LabelSource','foldernames'); 
+% [A,B,C] = splitEachLabel(imds,0.33,0.33);
+
+[A,B,C] = splitIMDS();
 
 %%%Train bag of words classifier
 
-%Train for A and B
-% [bagA,svmA] = bagOfWordsTrain(A,B);
+[bagA,svmA] = bagOfWordsTrain(A,B);
 
-%Train for C and C
-%[bagB,svmB] = bagOfWordsTrain(B,C);
+[bagB,svmB] = bagOfWordsTrain(B,C);
 
-%Train for C and A
-%[bagC,svmC] = bagOfWordsTrain(C,A);
+[bagC,svmC] = bagOfWordsTrain(C,A);
 
 %%%Train ResNet18 classifier
 
-% netA = resNet18Train(A,B);
+netA = resNet18Train(A,B);
+
+netB = resNet18Train(B,C);
+
+netC = resNet18Train(C,A);
 
 
 %imgsGN0 = gaussianNoise(C,0.01);
@@ -28,7 +31,7 @@ imds = imageDatastore('catdog', ...
 %res2 = bagOfWordsTest(bagA,svmA,imgsGN2,C.Labels);
 %res3 = bagOfWordsTest(bagA,svmA,imgsGN3,C.Labels);
 
-imgsTest = imdsToImages(C);
+%imgsTest = imdsToImages(C);
 % 
 % imgsGB1 = gaussianBlur(imgsTest);
 % 
