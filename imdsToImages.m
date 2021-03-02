@@ -12,5 +12,7 @@ function images = imdsToImages(imds)
         images(:,:,:,idx) = mat;
         idx = idx + 1;
     end
+    
+    images = uint8(images);
 end
 

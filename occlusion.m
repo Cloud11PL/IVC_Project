@@ -4,7 +4,7 @@ function images = occlusion(images,length)
    
     for n = 1:size(images,4)
         
-        image = images(:,:,:,1);
+        image = images(:,:,:,n);
 
         x = randi([1 224-length]);
         y = randi([1 224-length]);
