@@ -1,149 +1,78 @@
-%unzip('catdog.zip');
-% imds = imageDatastore('catdog', ...
-%      'IncludeSubfolders',true, ...
-%      'LabelSource','foldernames');
-% shuffleImds = shuffle(imds);
-% 
-% [testA,testB,testC] = splitEachLabel(shuffleImds,0.33,0.33);
-% 
-% trainA = imageDatastore(cat(1,testB.Files,testC.Files), ...
-%      'IncludeSubfolders',true, ...
-%      'LabelSource','foldernames');
-% trainB = imageDatastore(cat(1,testC.Files,testA.Files), ...
-%      'IncludeSubfolders',true, ...
-%      'LabelSource','foldernames');
-% trainC = imageDatastore(cat(1,testA.Files,testB.Files), ...
-%      'IncludeSubfolders',true, ...
-%      'LabelSource','foldernames');
-%  
+unzip('catdog.zip');
 
-global testAImgs
-global testBImgs
-global testCImgs
+imds = imageDatastore('catdog', ...
+     'IncludeSubfolders',true, ...
+     'LabelSource','foldernames');
+shuffleImds = shuffle(imds);
 
-% testAImgs = imdsToImages(testA); 
-% testBImgs = imdsToImages(testB); 
-% testCImgs = imdsToImages(testC); 
+[testA,testB,testC] = splitEachLabel(shuffleImds,0.33,0.33);
 
-global testALabels
-global testBLabels
-global testCLabels
+trainA = imageDatastore(cat(1,testB.Files,testC.Files), ...
+     'IncludeSubfolders',true, ...
+     'LabelSource','foldernames');
+trainB = imageDatastore(cat(1,testC.Files,testA.Files), ...
+     'IncludeSubfolders',true, ...
+     'LabelSource','foldernames');
+trainC = imageDatastore(cat(1,testA.Files,testB.Files), ...
+     'IncludeSubfolders',true, ...
+     'LabelSource','foldernames');
 
-% testALabels = testA.Labels;
-% testBLabels = testB.Labels;
-% testCLabels = testC.Labels;
+testAImgs = imdsToImages(testA);
+testBImgs = imdsToImages(testB);
+testCImgs = imdsToImages(testC);
 
-%%%Train bag of words classifier
+testALabels = testA.Labels;
+testBLabels = testB.Labels;
+testCLabels = testC.Labels;
 
-global bagA
-global bagB
-global bagC
+imgs = {testAImgs,testBImgs,testCImgs};
+labels = {testALabels,testBLabels,testCLabels};
 
-global svmA
-global svmB
-global svmC
+%Train bag of words classifier
 
-%[bagA,svmA] = bagOfWordsTrain(trainA);
+[bagA,svmA] = bagOfWordsTrain(trainA);
 
-%[bagB,svmB] = bagOfWordsTrain(trainB);
+[bagB,svmB] = bagOfWordsTrain(trainB);
 
-%[bagC,svmC] = bagOfWordsTrain(trainC);
+[bagC,svmC] = bagOfWordsTrain(trainC);
 
-%%%Train ResNet18 classifier
+bags = {bagA,bagB,bagC};
+svms = {svmA,svmB,svmV};
 
-%netA = resNet18Train(A,B);
+%Train ResNet18 classifier
 
-%netB = resNet18Train(B,C);
+netA = resNet18Train(trainA);
+netB = resNet18Train(trainB);
+netC = resNet18Train(trainC);
 
-%netC = resNet18Train(C,A);
+nets = {netA,netB,netC};
 
-%imgsGN0 = gaussianNoise(C,0.01);
-%imgsGN2 = gaussianNoise(C,2);
-%imgsGN3 = gaussianNoise(C,18);
+% Remove all variables. Maybe for memory
 
-%res1 = bagOfWordsTest(bagA,svmA,imgsGN0,C.Labels);
-%res2 = bagOfWordsTest(bagA,svmA,imgsGN2,C.Labels);
-%res3 = bagOfWordsTest(bagA,svmA,imgsGN3,C.Labels);
+clearvars -except nets bags svms images labels;
 
-%imgsTest = imdsToImages(C);
-% 
-% imgsGB1 = gaussianBlur(imgsTest);
-% 
-% resB1 = bagOfWordsTest(bagA,svmA,imgsGB1,C.Labels);
-% resN1 = resNet18Test(netA,imgsGB1,C.Labels);
-% 
-% imgsGB2 = gaussianBlur(imgsGB1);
-% 
-% res2 = bagOfWordsTest(bagA,svmA,imgsGB2,C.Labels);
-% resN2 = resNet18Test(netA,imgsGB2,C.Labels);
+%Vars
 
-
-
-% Run GNOISE TEST
-
-gNoiseSD = [0 2 4 6 8 10 12 14 16 18];
+gNoiseSD = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18];
+gBlurTimes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 cIncSD = [1.0, 1.03, 1.06, 1.09, 1.12, 1.15, 1.18, 1.21, 1.24, 1.27];
-gBlurTimes = [0 1 2 3 4 5 6 7 8 9];
-bIncSD = [ 0, 5, 10, 15, 20, 25, 30, 35, 40, 45];
+
+cDecSD = [1.0, 0.90, 0.80, 0.70, 0.60, 0.50, 0.40, 0.30, 0.20, 0.10];
+bIncDecSD = [ 0, 5, 10, 15, 20, 25, 30, 35, 40, 45];
+
+hueSatSD = [ 0.00, 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18];
 oLen = [ 0, 5, 10, 15, 20, 25, 30, 35, 40, 45 ];
 
+%Tests
 
-% accs = [];
-% 
-% for i = 1:numel(gNoiseSD)
-%     sd = gNoiseSD(i);
-%     imgs = gaussianNoise(testAImgs,sd);
-%     acc = bagOfWordsTest(bagA,svmA,imgs,testALabels);
-%     accs = cat(1,accs,acc);
-% 
+runTest(bags,svms,nets,images,labels,gNoiseSD,@gaussianNoise,'Gaussian Noise');
+runTest(bags,svms,nets,images,labels,gBlurTimes,@gaussianBlur,'Gaussian Blur');
+runTest(bags,svms,nets,images,labels,cIncSD,@imageContrast,'Contrast Increase');
 
-%test(gNoiseSD,@gaussianNoise);
+runTest(bags,svms,nets,images,labels,cDecSD,@imageContrast,'Contrast Decrease');
+runTest(bags,svms,nets,images,labels,bIncDecSD,@imageBrightness,'Brightness Increase');
+runTest(bags,svms,nets,images,labels,-bIncDecSD,@imageBrightness,'Brightness Decrease');
 
-%test(gBlurTimes,@gaussianBlur);
-
-%test(bIncSD,@imageBrightness);
-
-test(oLen,@occlusion);
-
-
-function test(vars,pert)
-
-    global testAImgs
-    global testBImgs
-    global testCImgs
-    
-    global testALabels
-    global testBLabels
-    global testCLabels
-    
-    global bagA
-    global bagB
-    global bagC
-
-    global svmA
-    global svmB
-    global svmC
-
-    accs = [];
-
-    for i = 1:numel(vars)
-        var = vars(i);
-        
-        imgsA = pert(testAImgs,var);
-        accA = bagOfWordsTest(bagA,svmA,imgsA,testALabels);
-        
-        imgsB = pert(testBImgs,var);
-        accB = bagOfWordsTest(bagB,svmB,imgsB,testBLabels);
-        
-        imgsC = pert(testCImgs,var);
-        accC = bagOfWordsTest(bagC,svmC,imgsC,testCLabels);
-        
-        acc = (accA + accB + accC)/3;
-        
-        accs = cat(1,accs,acc);
-    end
-    
-    plot(vars,accs);
-end
-
-
+runTest(bags,svms,nets,images,labels,hueSatSD,@HSVHue,'Hue Noise');
+runTest(bags,svms,nets,images,labels,hueSatSD,@HSVSaturation,'Saturation Noise');
+runTest(bags,svms,nets,images,labels,oLen,occlusion,'Occlusion');

@@ -4,12 +4,9 @@ function images = HSVSaturation(images,sd)
         image = images(:,:,:,n);
         imageHSV = rgb2hsv(image);
         saturation = imageHSV(:,:,2);
-        mat = normrnd(0,sd,224,224);
-        newSat = saturation + mat;
-        newSat(newSat<0)=0;
-        newSat(newSat>1)=1;
+        newSat = imnoise(saturation,'gaussian',0,sd);
         imageHSV(:,:,2) = newSat; 
-        images(:,:,:,n) = hsv2rgb(imageHSV);
+        images(:,:,:,n) = im2uint8(hsv2rgb(imageHSV));
     end
 
     images = uint8(images);

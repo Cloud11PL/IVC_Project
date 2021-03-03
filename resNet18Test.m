@@ -30,6 +30,6 @@
 
 
 function accuracy = resNet18Test(net,images,labels)
-    YPred = classify(net,images);
+    YPred = classify(net,images,'MiniBatchSize',10);
     accuracy = mean(YPred == labels)*100;
 end
