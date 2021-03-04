@@ -1,8 +1,8 @@
 images/
-svms
-bags
-nets
-imgs
-labels
+svms.mat
+bags.mat
+nets.mat
+imgs.mat
+labels.mat
 catdog
-matlab
+matlab.mat
