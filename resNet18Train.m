@@ -27,6 +27,7 @@ function net = resNet18Train(imdsTrain)
         connections = lgraph.Connections;
 
         fcidx = getnameidx({layers.Name},learnableLayer.Name);
+        %fcidx = 69;
 
         layers(1:fcidx) = freezeWeights(net.Layers(1:fcidx));
         lgraph = createLgraphUsingConnections(layers,connections);
