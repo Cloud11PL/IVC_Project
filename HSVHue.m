@@ -8,7 +8,7 @@ function images = HSVHue(images,sd)
         newHue = hue + mat;
         newHue(newHue>1) = newHue(newHue>1)-1;
         imageHSV(:,:,1) = newHue; 
-        images(:,:,:,n) = im2unit8(hsv2rgb(imageHSV));
+        images(:,:,:,n) = im2uint8(hsv2rgb(imageHSV));
     end
 
     images = uint8(images);
