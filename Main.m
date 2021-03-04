@@ -49,7 +49,11 @@ nets = {netA,netB,netC};
 
 % Remove all variables. Maybe for memory
 
-clearvars -except nets bags svms images labels;
+save nets bags svms labels imgs;
+
+%load nets bags svams labels imgs;
+
+%clearvars -except nets bags svms images labels;
 
 %Vars
 
@@ -65,14 +69,16 @@ oLen = [ 0, 5, 10, 15, 20, 25, 30, 35, 40, 45 ];
 
 %Tests
 
-runTest(bags,svms,nets,images,labels,gNoiseSD,@gaussianNoise,'Gaussian Noise');
-runTest(bags,svms,nets,images,labels,gBlurTimes,@gaussianBlur,'Gaussian Blur');
-runTest(bags,svms,nets,images,labels,cIncSD,@imageContrast,'Contrast Increase');
+% RUN ONE AT A TIME
 
-runTest(bags,svms,nets,images,labels,cDecSD,@imageContrast,'Contrast Decrease');
-runTest(bags,svms,nets,images,labels,bIncDecSD,@imageBrightness,'Brightness Increase');
-runTest(bags,svms,nets,images,labels,-bIncDecSD,@imageBrightness,'Brightness Decrease');
-
-runTest(bags,svms,nets,images,labels,hueSatSD,@HSVHue,'Hue Noise');
-runTest(bags,svms,nets,images,labels,hueSatSD,@HSVSaturation,'Saturation Noise');
-runTest(bags,svms,nets,images,labels,oLen,occlusion,'Occlusion');
+% runTest(bags,svms,nets,images,labels,gNoiseSD,@gaussianNoise,'Gaussian Noise');
+% runTest(bags,svms,nets,images,labels,gBlurTimes,@gaussianBlur,'Gaussian Blur');
+% runTest(bags,svms,nets,images,labels,cIncSD,@imageContrast,'Contrast Increase');
+% 
+% runTest(bags,svms,nets,images,labels,cDecSD,@imageContrast,'Contrast Decrease');
+% runTest(bags,svms,nets,images,labels,bIncDecSD,@imageBrightness,'Brightness Increase');
+% runTest(bags,svms,nets,images,labels,-bIncDecSD,@imageBrightness,'Brightness Decrease');
+% 
+% runTest(bags,svms,nets,images,labels,hueSatSD,@HSVHue,'Hue Noise');
+% runTest(bags,svms,nets,images,labels,hueSatSD,@HSVSaturation,'Saturation Noise');
+% runTest(bags,svms,nets,images,labels,oLen,@occlusion,'Occlusion');
